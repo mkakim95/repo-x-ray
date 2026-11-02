@@ -26,3 +26,9 @@ This MVP discovers pom.xml/build.gradle/build.gradle.kts and settings.gradle/set
 Local verification: `sh test-core.sh` passed on the available Java 21 compiler module. This is not a full Spring Boot build, filter JUnit execution, Java 25 validation, or live GitHub integration test.
 
 Additional verified core cases: Kotlin/Groovy settings includes, buildless modules, projectDir aliases, outgoing dependencies from mapped modules, nested build scoping, unsafe paths, and dynamic-settings warnings.
+
+`ApiIntegrationTest` is an offline MVC/JSON contract smoke test. It runs the request-size filter, controller, real GitHub response decoding, Maven parser, graph construction, result serialization and cache using a strict in-memory GitHub HTTP fixture. It verifies directed module edges, immutable refs, file/language counts, cached requests, and invalid/malformed/oversized request rejection without network access. It does not prove live GitHub connectivity, the JDK HTTP response-body limiter, or a deployed servlet container.
+
+The Compose CI job also captures desktop/mobile PNGs and rendered HTML of the explicitly labelled synthetic demo, alongside application logs, in the `demo-screenshots-and-compose-logs` artifact (14-day retention). Screenshot capture and DOM checks are not a visual review; inspect the PNGs before claiming layout verification. These captures do not represent live repository analysis.
+
+For an explicit live connectivity check, manually dispatch CI with `live_github` enabled. It analyzes `mkakim95/spring5webapp`, requires a resolved commit and nonempty modules, and saves the response in the same artifact. This opt-in step fails visibly on GitHub outages/rate limits; normal CI remains offline for analysis, and no successful live run is implied by its configuration.

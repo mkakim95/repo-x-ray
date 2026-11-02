@@ -9,7 +9,9 @@ import static dev.repoxray.Model.*;
 @RestController
 @RequestMapping("/api")
 public class AnalysisController {
- private final GitHubSource github=new GitHubSource();
+ private final GitHubSource github;
+ public AnalysisController(){this(new GitHubSource());}
+ AnalysisController(GitHubSource github){this.github=github;}
  private final Semaphore slots=new Semaphore(2);
  private record Cached(Analysis result,Instant expires){}
  private final Map<RepoInput,Cached> cache=Collections.synchronizedMap(new LinkedHashMap<>());

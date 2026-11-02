@@ -2,6 +2,12 @@ name: CI
 on:
   push:
   pull_request:
+  workflow_dispatch:
+    inputs:
+      live_github:
+        description: Also test live GitHub analysis (may fail on upstream rate limits)
+        type: boolean
+        default: false
 permissions:
   contents: read
 jobs:
@@ -50,5 +56,49 @@ jobs:
           done
           docker compose logs
           exit 1
+      - name: Optional live GitHub API smoke
+        if: github.event_name == 'workflow_dispatch' && inputs.live_github
+        run: |
+          mkdir -p artifacts
+          curl --fail-with-body --silent --show-error --max-time 90 \
+            http://localhost:8080/api/analyze -H 'Content-Type: application/json' \
+            -d '{"url":"https://github.com/mkakim95/spring5webapp"}' \
+            -o artifacts/live-github-analysis.json
+          python3 - <<'PYTHON'
+          import json, re
+          report = json.load(open('artifacts/live-github-analysis.json'))
+          assert re.fullmatch(r'[a-fA-F0-9]{40}', report['repository']['ref']), report
+          assert report['repository']['owner'] == 'mkakim95', report
+          assert report['repository']['name'] == 'spring5webapp', report
+          assert report['stats']['modules'] > 0 and report['nodes'], report
+          print('Live analysis passed:', report['stats'])
+          print('Warnings:', report.get('warnings', []))
+          PYTHON
+      - name: Capture labelled demo screenshots
+        run: |
+          mkdir -p artifacts
+          chrome=$(command -v google-chrome || command -v chromium)
+          for viewport in desktop:1440,1100 mobile:390,844; do
+            name=${viewport%%:*}
+            size=${viewport#*:}
+            "$chrome" --headless --no-sandbox --disable-dev-shm-usage \
+              --hide-scrollbars --window-size="$size" --virtual-time-budget=5000 \
+              --screenshot="$PWD/artifacts/demo-$name.png" --dump-dom \
+              http://localhost:8080/ > "artifacts/demo-$name.html"
+            test -s "artifacts/demo-$name.png"
+            grep -q 'Illustrative data' "artifacts/demo-$name.html"
+            grep -q 'Dependency map' "artifacts/demo-$name.html"
+            grep -q '<canvas' "artifacts/demo-$name.html"
+          done
+      - name: Collect application logs
+        if: always()
+        run: mkdir -p artifacts && docker compose logs --no-color > artifacts/compose.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: demo-screenshots-and-compose-logs
+          path: artifacts/
+          retention-days: 14
+          if-no-files-found: error
       - if: always()
         run: docker compose down --volumes

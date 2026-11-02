@@ -12,7 +12,9 @@ import static dev.repoxray.Model.*;
 
 public final class GitHubSource {
  public static final int MAX_FILES=100,MAX_FILE_BYTES=512*1024,MAX_TOTAL_BYTES=8*1024*1024;
- private final HttpClient client=HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).followRedirects(HttpClient.Redirect.NEVER).build();
+ private final HttpClient client;
+ public GitHubSource(){this(HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).followRedirects(HttpClient.Redirect.NEVER).build());}
+ GitHubSource(HttpClient client){this.client=client;}
  private final ObjectMapper json=new ObjectMapper();
  private final String token=System.getenv("GITHUB_TOKEN");
  public static final class Failure extends RuntimeException {final int status;final String code;public Failure(int s,String c,String m){super(m);status=s;code=c;}}
