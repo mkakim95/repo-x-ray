@@ -38,7 +38,9 @@ class GitLabIntegrationTest {
  }
  @Test void rejectsUnsafePaginationAndRedirects() throws Exception {
   for(String link:List.of("<https://evil.test/tree?page_token=x>; rel=\"next\"","<"+TREE+"?page_token=x&page_token=y>; rel=\"next\""))assertThrows(GitHubSource.Failure.class,()->GitLabSource.nextCursor(link,TREE));
-  HttpClient client=mock(HttpClient.class);when(client.send(any(HttpRequest.class),org.mockito.ArgumentMatchers.<HttpResponse.BodyHandler<byte[]>>any())).thenReturn(response(302,"",""));
+  HttpClient client=mock(HttpClient.class);
+  HttpResponse<byte[]> redirect=response(302,"",""); // Complete response stubbing before opening client stubbing.
+  when(client.send(any(HttpRequest.class),org.mockito.ArgumentMatchers.<HttpResponse.BodyHandler<byte[]>>any())).thenReturn(redirect);
   var source=new GitLabSource(BASE,"fixture-token",client);var error=assertThrows(GitHubSource.Failure.class,()->source.analyze(source.parse(BASE+"/team/repo",null)));assertEquals("GITLAB_REDIRECT",error.code);verify(client,times(1)).send(any(HttpRequest.class),org.mockito.ArgumentMatchers.<HttpResponse.BodyHandler<byte[]>>any());
  }
  @Test void streamedResponseLimitCancelsBeforeAccumulation(){
