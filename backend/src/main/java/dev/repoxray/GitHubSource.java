@@ -72,8 +72,8 @@ public final class GitHubSource {
   catch(java.io.IOException e){throw new Failure(502,"GITHUB_IO","Unable to read GitHub response, or response exceeded safe size limits.");}
  }
  private static String encode(String value){return URLEncoder.encode(value,StandardCharsets.UTF_8).replace("+","%20");}
- private static String language(String p){int dot=p.lastIndexOf('.');if(dot<0)return null;return switch(p.substring(dot+1)){case "java"->"Java";case "kt","kts"->"Kotlin";case "groovy"->"Groovy";case "js","jsx","mjs"->"JavaScript";case "ts","tsx"->"TypeScript";case "py"->"Python";case "go"->"Go";case "rs"->"Rust";case "c","h"->"C";case "cpp","hpp","cc"->"C++";case "rb"->"Ruby";case "scala"->"Scala";default->null;};}
- private static final class LimitedBody implements HttpResponse.BodySubscriber<byte[]> {
+ static String language(String p){int dot=p.lastIndexOf('.');if(dot<0)return null;return switch(p.substring(dot+1)){case "java"->"Java";case "kt","kts"->"Kotlin";case "groovy"->"Groovy";case "js","jsx","mjs"->"JavaScript";case "ts","tsx"->"TypeScript";case "py"->"Python";case "go"->"Go";case "rs"->"Rust";case "c","h"->"C";case "cpp","hpp","cc"->"C++";case "rb"->"Ruby";case "scala"->"Scala";default->null;};}
+ static final class LimitedBody implements HttpResponse.BodySubscriber<byte[]> {
   private final HttpResponse.BodySubscriber<byte[]> delegate=HttpResponse.BodySubscribers.ofByteArray();private final int max;private long seen;private Flow.Subscription subscription;
   LimitedBody(int max){this.max=max;}
   public CompletionStage<byte[]> getBody(){return delegate.getBody();}

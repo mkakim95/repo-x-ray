@@ -11,6 +11,10 @@ public final class CoreChecks {
    try{RepoInput.parse(url,null);throw new AssertionError("accepted "+url);}catch(IllegalArgumentException expected){}
   }
   try{RepoInput.parse("https://github.com/a/b","../x");throw new AssertionError("ref traversal");}catch(IllegalArgumentException expected){}
+  check(GitLabInput.parse("https://gitlab.corp/team/sub/project.git",null,"https://gitlab.corp").project().equals("team/sub/project"),"GitLab nested group");
+  check(GitLabInput.parse("https://gitlab.corp:8443/gitlab/team/project","feature/test","https://gitlab.corp:8443/gitlab").owner().equals("team"),"GitLab explicit installation path/port");
+  for(String bad:List.of("https://gitlab.corp.evil/team/project","https://user@gitlab.corp/team/project","https://gitlab.corp/team/project?private_token=secret","https://gitlab.corp/team/%2e%2e","https://gitlab.corp:8443/team/project","https://gitlab.corp/team/project/-/tree/main","http://gitlab.corp/team/project")){try{GitLabInput.parse(bad,null,"https://gitlab.corp");throw new AssertionError("GitLab URL accepted "+bad);}catch(IllegalArgumentException expected){}}
+  try{GitLabInput.validateBase("http://gitlab.corp");throw new AssertionError("insecure base");}catch(IllegalArgumentException expected){}
   Repository repo=new Repository("a","b","https://github.com/a/b","abc");
   StaticAnalyzer analyzer=new StaticAnalyzer();
   Map<String,String> files=Map.of("pom.xml",pom("root","a"),"a/pom.xml",pom("a","root"),"b/pom.xml","<project><parent><groupId>org.test</groupId></parent><artifactId>b</artifactId><dependencyManagement><dependencies><dependency><groupId>org.test</groupId><artifactId>a</artifactId></dependency></dependencies></dependencyManagement></project>");

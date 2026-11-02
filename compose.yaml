@@ -4,6 +4,8 @@ services:
     build: ./backend
     environment:
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      GITLAB_BASE_URL: ${GITLAB_BASE_URL:-}
+      GITLAB_TOKEN: ${GITLAB_TOKEN:-}
       JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=65 -XX:+ExitOnOutOfMemoryError
     expose:
       - "8080"

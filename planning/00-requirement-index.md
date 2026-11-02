@@ -5,7 +5,7 @@ This pack separates the local MVP from release-hardening work. A stage is not a 
 | ID | Requirement | Primary stage | Evidence required |
 |---|---|---|---|
 | R01 | Java 25 / Spring Boot API, Vue 3 / Vite UI | 01 | Backend tests; frontend typecheck/build |
-| R02 | Public GitHub input and immutable source ref | 02 | URL/ref/visibility tests; SHA in result |
+| R02 | Public GitHub / configured GitLab input and immutable source ref | 02 | URL/ref/visibility tests; SHA in result |
 | R03 | Static Maven module/dependency analysis | 03 | Golden fixture graphs and XXE negatives |
 | R04 | Static Gradle subset, no execution | 04 | Literal fixtures and dynamic-script warnings |
 | R05 | Graph, cycles, useful diagnostics | 05 | Deterministic SCC fixtures; partial coverage labels |

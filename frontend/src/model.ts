@@ -1,6 +1,19 @@
 export interface Module { id: string; label: string; path: string; buildTool: string; dependencies: string[] }
-export interface Analysis { repository: {owner:string;name:string;url:string;ref?:string}; nodes:Module[]; edges:{source:string;target:string}[]; cycles:string[][]; stats:{modules:number;edges:number;externalDependencies:number;cycles:number;filesScanned:number;totalFiles?:number;languages?:Record<string,number>}; warnings:string[] }
+export interface Analysis { repository: {owner:string;name:string;url:string;ref?:string;provider?:'github'|'gitlab';shareable?:boolean}; nodes:Module[]; edges:{source:string;target:string}[]; cycles:string[][]; stats:{modules:number;edges:number;externalDependencies:number;cycles:number;filesScanned:number;totalFiles?:number;languages?:Record<string,number>}; warnings:string[] }
 export function githubUrl(value: string): boolean { try { const url = new URL(value); return url.protocol === 'https:' && url.hostname === 'github.com' && /^\/[\w.-]+\/[\w.-]+\/?$/.test(url.pathname) && !url.search && !url.hash && !url.username && !url.password; } catch { return false; } }
+/** Syntax only: the server independently enforces the configured GitLab allowlist. */
+export function repositoryUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    if (url.hostname === 'github.com') return githubUrl(value);
+    return url.protocol === 'https:' && !url.username && !url.password && !url.search && !url.hash
+      && /^\/[\w.-]+(?:\/[\w.-]+)+\/?$/.test(url.pathname);
+  } catch { return false; }
+}
+/** Fail closed if the server does not explicitly mark a public GitHub report shareable. */
+export function canShare(data: Analysis): boolean {
+  return data.repository.provider === 'github' && data.repository.shareable === true && githubUrl(data.repository.url);
+}
 export function connections(data: Analysis, id: string): number { return data.edges.filter(e => e.source === id || e.target === id).length; }
 export function cycleIds(data: Analysis): Set<string> { return new Set(data.cycles.flat()); }
 const modules = ['gateway','identity','catalog','checkout','payments','notifications','search','shared-kernel','observability'];

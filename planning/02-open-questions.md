@@ -3,7 +3,7 @@
 ## Working assumptions
 
 - “Dependencies” means declared build-module relationships, not source-code imports or runtime calls.
-- Public GitHub repositories only. Optional credentials remain backend-only.
+- Public GitHub plus the explicitly operator-configured corporate HTTPS GitLab instance. Credentials remain backend-only. All GitLab reports are private/local, uncached and nonshareable.
 - Gradle is a deliberately limited static subset. No effective-model fidelity is promised.
 - Compose is local-only by default; a public share URL requires an operator-authorized reachable deployment.
 - Opaque result IDs are convenience identifiers, not authorization credentials.
@@ -18,4 +18,4 @@
 
 ## Deliberate exclusions
 
-No private repository support, build execution, external parent/BOM downloading, submodules, Git LFS, deployment automation, paid API, or automatic publication. Expand these only through an explicit reviewed task.
+No arbitrary private-provider support beyond configured GitLab, build execution, external parent/BOM downloading, submodules, Git LFS, deployment automation, paid API, or automatic publication. Expand these only through an explicit reviewed task.
